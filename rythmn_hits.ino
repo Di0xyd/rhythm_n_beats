@@ -14,7 +14,7 @@ void flash(int pin);
 void handleRoot();
 void setBpm();
 void getBpm();
-bool beatCheck();
+bool beatCheck(int ms);
 
 ESP8266WebServer server(80);
 const char *ssid = "metronome_server";
@@ -97,7 +97,9 @@ void setupServer() {
 }
 
 void metronome() {
-  if ((millis() - lastTime) >= waitBtwNotes) {
+
+  long timeCheck = millis() - lastTime;
+  if (timeCheck >= waitBtwNotes) {
 
     lastTime = millis();
 
@@ -110,8 +112,7 @@ void metronome() {
       digitalWrite(D5, HIGH);
     }
 
-    if (beatCheck()) {
-      Serial.println(2000);
+    if (beatCheck(100)) {
       goodBeat++;
     }
 
@@ -123,12 +124,6 @@ void metronome() {
       beatCounter = 0;
   }
 
-  if (beatCheck()) {
-    Serial.println(1000);
-    badBeat++;
-  }
-  Serial.println(1);
-
 }
 
 void flash(int pin) {
@@ -137,13 +132,15 @@ void flash(int pin) {
   digitalWrite(pin, LOW);
 }
 
-bool beatCheck() {
+bool beatCheck(int ms) {
   long currentTime = millis();
   long sensorValue = 0;
-  while (millis() <= currentTime + 50) {
-    sensorValue += digitalRead(D0);
+  while (millis() <= currentTime + ms) {
+    if (digitalRead(D0) == 1) {
+      sensorValue = 1;
+    }
   }
-  return sensorValue > 0;
+  return sensorValue == 1;
 }
 
 
