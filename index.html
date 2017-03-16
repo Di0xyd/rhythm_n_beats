@@ -36,9 +36,9 @@
 			<h1>IoT Project - Rythm'n Hits</h1>
 			<br><br>
 			<h3 class="actual">Actual BPM: <span id="actualBPM"></span></h3>
-			<form method="get" action="http://10.33.0.77/setbpm" class="form-inline" target=":blank">
+			<form method="get" action="http://10.33.3.86/setbpm" id="updateBPMForm" class="form-inline">
 				<input type="number" id="inputBpm" class="form-control mb-2 mr-sm-2 mb-sm-0" name="bpm">
-				<button type="submit" class="btn btn-primary">Update BPM</button>
+				<input type="submit" class="btn btn-primary" value="Update BPM">
 			</form>
 		</div>
 	</div>
@@ -47,13 +47,29 @@
 	<!-- Latest compiled and minified JavaScript -->
 	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
 
-	<!-- custom behavior -->
 	<script>
-		// get
-		$.get("http://10.33.0.77/getbpm", function (data) {
-			$("#actualBPM").html(data);
-			$("#inputBpm").val(data);
+		$(document).ready(function() {
+			getCurrentBPM();
+
+			$('#updateBPMForm').submit(function(form) {
+				form.preventDefault();
+				$.ajax({
+					url: 'http://10.33.3.86/setbpm',
+					type: 'get',
+					data: $("#updateBPMForm").serialize(),
+					success: function() {
+						getCurrentBPM();
+					}
+				});
+			});
 		});
+
+		function getCurrentBPM() {
+			$.get("http://10.33.3.86/getbpm", function (data) {
+				$("#actualBPM").html(data);
+				$("#inputBpm").val(data);
+			});
+		}
 	</script>
 </body>
 </html>
