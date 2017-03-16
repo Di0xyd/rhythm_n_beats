@@ -37,3 +37,5 @@ We made the project by following these steps :
     - Graphs of beats for 10 last measures
 
 ## Electrical schematic
+
+![Breadboard]("schematic.png" "Breadboard")
