@@ -25,33 +25,34 @@ char* html_index = "\
 <script>// get$.get('http://10.33.0.77/getbpm', function (data){$('#actualBPM').html(data);});</script></body></html>\
 ";
 
-/*****Initialization*****/
 ESP8266WebServer server(80);
 const char *ssid = "metronome_server";
 
-long bpm = 60;
-long beatCounter = 0; // % 4 == 0 = blue (premier temps) / sinon autre-
-const long msCountIn1Min = 60000;
-long waitBtwNotes = msCountIn1Min / bpm;
-long lastTime = 0;
+long bpm = 60;                               //Beat Per Minutes
+long beatCounter = 0;                       // Used to know where we are in the measure (in 4/4 there's 4 times in a measure)
+const long msCountIn1Min = 60000;          //  Number of ms in 1 sec 
+long waitBtwNotes = msCountIn1Min / bpm;  //   The wait beetwen each note
+long lastTime = 0;                       //    Last time we checked the metronome time   
 
 // the setup routine runs once when you press reset:
 void setup() {
 
+  //Init serial connection
   Serial.begin(9600);
-  pinMode(A0, INPUT);
-  pinMode(D5, OUTPUT);
-  pinMode(D4, OUTPUT);
-  pinMode(D2, OUTPUT);
 
-  Serial.println("Starting WiFi.");
+  //init the pins 
+  pinMode(A0, INPUT);     // Input for the tilt sensor 
+  pinMode(D5, OUTPUT);   //  B -> RGB LED
+  pinMode(D4, OUTPUT);  //   G -> RGB LED
+  pinMode(D2, OUTPUT); //    Buzzer
+
   setupWifi();
   setupServer();
 }
 
 void loop() {
 
-  metronome();
+  metronome();   // here we handle the metronome code
   server.handleClient();
 }
 
@@ -62,18 +63,17 @@ void handleRoot() {
 void setBpm() {
   String bpm_str;
   if ( server.hasArg("bpm") ) {
-    
+
     bpm_str = server.arg(0);
-    //add function to init
     long old_bpm = bpm;
-    bpm = bpm_str.toInt();
-    
+    bpm = bpm_str.toInt(); // if cast fail = 0
+
     if (bpm <= 0 || bpm > 250)  {
       bpm = old_bpm;
       server.send(400, "text/html", "error");
       return;
     }
-    
+
     waitBtwNotes = msCountIn1Min / bpm;
   }
 
@@ -86,13 +86,17 @@ void getBpm() {
 
 void setupWifi() {
 
+  Serial.println("Starting wifi");
   WiFiManager wifiManager;
-  //wifiManager.resetSettings();
-  wifiManager.setAPCallback([](WiFiManager* manager){});
- 
+  wifiManager.setAPCallback(
+  [](WiFiManager * manager) {
+     Serial.println("Falling back to AP Mode");
+  });
+
   wifiManager.autoConnect(ssid);
   Serial.println("local ip");
   Serial.println(WiFi.localIP());
+  Serial.println("Wifi OK");
 }
 
 void setupServer() {
@@ -104,6 +108,8 @@ void setupServer() {
 }
 
 void metronome() {
+
+  //when we its time for the next beat
   if ((millis() - lastTime) >= waitBtwNotes) {
     lastTime = millis();
 
@@ -117,8 +123,9 @@ void metronome() {
     }
 
     beatCounter++;
-    if (beatCounter > 3)
+    if (beatCounter > 3) {
       beatCounter = 0;
+    }
   }
 }
 
