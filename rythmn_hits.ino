@@ -14,30 +14,30 @@ void flash(int pin);
 void handleRoot();
 void setBpm();
 void getBpm();
-bool beatCheck(int ms);
+bool isBeat(int ms);
 
 ESP8266WebServer server(80);
 const char *ssid = "metronome_server";
 
-long goodBeat = 0;
-long badBeat = 0;
-long bpm = 60;
-long beatCounter = 0; // % 4 == 0 = blue (premier temps) / sinon autre-
-const long msCountIn1Min = 60000;
-long waitBtwNotes = msCountIn1Min / bpm;
-long lastTime = 0;
+long goodBeat = 0;                        // Counting the good beats
+long bpm = 60;                            // Beats Per Minute
+long beatCounter = 0;                     // Counting the beats for a measure (4/4 has 4 times)
+const long msCountIn1Min = 60000;         // Numbers of ms in 1 sec
+long waitBtwNotes = msCountIn1Min / bpm;  // time beetwen each note in ms
+long lastBeatTime = 0;
 
 // the setup routine runs once when you press reset:
 void setup() {
 
+  //setting the serial connection
   Serial.begin(9600);
-  pinMode(D0, INPUT);
-  pinMode(D5, OUTPUT);
-  pinMode(D4, OUTPUT);
-  pinMode(D2, OUTPUT);
-  pinMode(D1, OUTPUT);
-  pinMode(D3, OUTPUT);
-  Serial.println("Starting WiFi.");
+
+  //Settings the pinout
+  pinMode(D0, INPUT);   // Vibration sensor
+  pinMode(D5, OUTPUT);  // B -> RGB LED
+  pinMode(D4, OUTPUT);  // G -> RGB LED
+  pinMode(D2, OUTPUT);  // Piezzo Speaker
+  
   setupWifi();
   setupServer();
 }
@@ -78,14 +78,15 @@ void getBpm() {
 }
 
 void setupWifi() {
-
+  
+  Serial.println("Starting wifi");
   WiFiManager wifiManager;
-  //wifiManager.resetSettings();
   wifiManager.setAPCallback([](WiFiManager * manager) {});
 
   wifiManager.autoConnect(ssid);
   Serial.println("local ip");
   Serial.println(WiFi.localIP());
+  Serial.println("Wifi is setup");
 }
 
 void setupServer() {
@@ -98,10 +99,11 @@ void setupServer() {
 
 void metronome() {
 
-  long timeCheck = millis() - lastTime;
-  if (timeCheck >= waitBtwNotes) {
+  long beatInterval = millis() - lastBeatTime;
+  
+  if (beatInterval >= waitBtwNotes) {
 
-    lastTime = millis();
+    lastBeatTime = millis();
 
     if (beatCounter % 4 == 0) {
       tone(D2, 440, 50);
@@ -112,7 +114,7 @@ void metronome() {
       digitalWrite(D5, HIGH);
     }
 
-    if (beatCheck(100)) {
+    if (isBeat(100)) {
       goodBeat++;
     }
 
@@ -120,26 +122,27 @@ void metronome() {
     digitalWrite(D4, LOW);
 
     beatCounter++;
-    if (beatCounter > 3)
+    
+    if (beatCounter > 3) {
       beatCounter = 0;
+    }
   }
 
 }
 
-void flash(int pin) {
-  digitalWrite(pin, HIGH);
-  delay(20);
-  digitalWrite(pin, LOW);
-}
+//checks if the sensors sensed a vibrating within the interval
+bool isBeat(int ms) {
 
-bool beatCheck(int ms) {
   long currentTime = millis();
   long sensorValue = 0;
+
   while (millis() <= currentTime + ms) {
+
     if (digitalRead(D0) == 1) {
       sensorValue = 1;
     }
   }
+
   return sensorValue == 1;
 }
 

@@ -8,5 +8,5 @@ extern const char* html_index = "\
 <input type='submit' class='btn btn-primary' value='Update BPM'></form></div></div><script src='https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js'></script>\
 <script src='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js'></script>\
 <script>$(document).ready(function(){getCurrentBPM();$('#updateBPMForm').submit(function(form){form.preventDefault();$.ajax({url: '/setbpm',type: 'get',data: $('#updateBPMForm').serialize(),success: function(){getCurrentBPM();}});});});\
-function getCurrentBPM(){$.get('/getbpm', function (data){$('#actualBPM').html(data);$('#inputBpm').val(data);});}</script></body></html>
+function getCurrentBPM(){$.get('/getbpm', function (data){$('#actualBPM').html(data);$('#inputBpm').val(data);});}</script></body></html> \
 ";
