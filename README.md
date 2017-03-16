@@ -1,7 +1,18 @@
 # Projet IOT - Rythmn_hits
 
 The goal of this project is to allow a drummer to train his rythmic accuracy.
-It is composed of a metronome and a beat checker.
+It is composed of a metronome, a beat checker and a web interface to check for the accuracy and set the BPM.
+
+## Needed hardware
+- Weemos D1 Mini
+- RGB LED with common anode
+- Passive Buzzer
+- SW-420 Vibration sensor
+
+## Installation notes
+
+The wifi code is based of this github repository so, you will need to follow their instructions:
+- https://github.com/honnet/iot_intro/wiki/IOT-Intro
 
 ## Steps followed
 We made the project by following these steps :
@@ -26,5 +37,3 @@ We made the project by following these steps :
     - Graphs of beats for 10 last measures
 
 ## Electrical schematic
-
-     
