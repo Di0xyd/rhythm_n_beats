@@ -5,6 +5,7 @@
 #include <ESP8266WebServer.h>     //Local WebServer used to serve the configuration portal
 #include <WiFiManager.h>          //https://github.com/tzapu/WiFiManager WiFi Configuration Magic
 #include <ESP8266mDNS.h>          //Allow custom URL
+#include "html.h"
 
 void setupServer();
 void setupWifi();
@@ -14,6 +15,7 @@ void handleRoot();
 void setBpm();
 void getBpm();
 
+<<<<<<< HEAD
 char* html_index = "\
 <!DOCTYPE html><html><head><link rel='stylesheet' href='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css'><meta charset='utf-8'>\
 <meta http-equiv='X-UA-Compatible' content='IE=edge'> <meta name='viewport' content='width=device-width, initial-scale=1'>\
@@ -26,6 +28,8 @@ char* html_index = "\
 ";
 
 /*****Initialization*****/
+=======
+>>>>>>> IHM
 ESP8266WebServer server(80);
 const char *ssid = "metronome_server";
 
