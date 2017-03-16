@@ -36,6 +36,6 @@ We made the project by following these steps :
     - show number of wrong beats
     - Graphs of beats for 10 last measures
 
-## Electrical schematic
+## Breadboard wiring
 
-![Breadboard]("schematic.png" "Breadboard")
+![Breadboard](sketch.png "Breadboard")
