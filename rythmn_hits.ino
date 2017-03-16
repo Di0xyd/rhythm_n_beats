@@ -20,6 +20,8 @@ void getBpm();
 void beatCheck();
 unsigned char pulse_count(unsigned long *p_count);
 void pulse_init(void);
+void setTimeDefinition();
+void getTimeDefinition();
 
 ESP8266WebServer server(80);
 const char *ssid = "metronome_server";
@@ -33,6 +35,9 @@ long waitBtwNotes = msCountIn1Min / bpm;  // time beetwen each note in ms
 long lastBeatTime = 0;
 long lastBeat = 0;
 long unsigned int beatInterval = 0;
+int timeDefinition = 4;
+
+
 Bounce debouncer = Bounce();
 
 // the setup routine runs once when you press reset:
@@ -89,6 +94,30 @@ void getBpm() {
   server.send(200, "text/html", String(bpm));
 }
 
+void setTimeDefinition() {
+  
+  String timeDefStr;
+  if ( server.hasArg("timedefinition") ) {
+
+    timeDefStr = server.arg(0);
+    //add function to init
+    long oldTimeDef = timeDefinition;
+    timeDefinition = timeDefStr.toInt();
+
+    if (timeDefinition <= 0 || timeDefinition > 32)  {
+      timeDefinition = oldTimeDef;
+      server.send(400, "text/html", "error");
+      return;
+    }
+  }
+
+  server.send(200, "text/html", "OK");
+}
+
+void getTimeDefinition() {
+    server.send(200, "text/html", String(timeDefinition));
+}
+
 void setupWifi() {
 
   Serial.println("Starting wifi");
@@ -105,6 +134,8 @@ void setupServer() {
   server.on("/", handleRoot);
   server.on("/setbpm", setBpm);
   server.on("/getbpm", getBpm);
+  server.on("/settimedefinition", setTimeDefinition);
+  server.on("/gettimedefinition", getTimeDefinition);
   server.begin();
   Serial.println("HTTP server started");
 }
@@ -117,7 +148,7 @@ void metronome() {
 
     lastBeatTime = millis();
 
-    if (beatCounter % 4 == 0) {
+    if (beatCounter % timeDefinition == 0) {
       tone(D2, 440, 50);
       digitalWrite(D4, HIGH);
     }
@@ -132,7 +163,7 @@ void metronome() {
 
     beatCounter++;
 
-    if (beatCounter > 3) {
+    if (beatCounter > timeDefinition - 1) {
       beatCounter = 0;
     }
   }
@@ -158,7 +189,8 @@ void beatCheck() {
       Serial.println(1);
     }
   }
-  
+}
+
 void pulse_init(void) {
   pinMode(D0, INPUT);
 }
