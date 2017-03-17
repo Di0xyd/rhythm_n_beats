@@ -1,6 +1,6 @@
 # Projet IOT - Rhythm_n_beats
 
-The goal of this project is to allow a drummer to train his rythmic accuracy.
+The goal of this project is to allow a drummer to train his rhythmic accuracy.
 It is composed of a metronome, a beat checker and a web interface to check for the accuracy and set the BPM.
 
 Presentation :
