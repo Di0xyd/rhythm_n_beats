@@ -32,6 +32,7 @@ We made the project by following these steps :
     - Light on the first beat of a measure
       - IHM
         - get Current BPM
+        - set time signature
         - set new BPM
 
 - Creating the beat checker
