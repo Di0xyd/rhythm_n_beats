@@ -7,11 +7,18 @@
 #include <WiFiManager.h>          //https://github.com/tzapu/WiFiManager WiFi Configuration Magic
 #include <ESP8266mDNS.h>          //Allow custom URL
 #include <Bounce2.h>
+
 #include "html.h"
 
 #define BEATS_DATA_MAX 5
 #define GOOD_BEAT_ERROR_MARGIN 100
 #define MS_IN_1_MIN 60000
+
+#define VIB_SENS D0
+#define BLUE_RGB_LED D5
+#define GREEN_RGB_LED D4
+#define PIEZZO  D2
+#define FAIL_LED D1
 
 #define CREATE_BEAT_DATA(suc)    BeatData bd; \
   bd.success = suc; \
@@ -61,7 +68,7 @@ BeatData beatsData[BEATS_DATA_MAX];
 int beatDataIndex = 0;
 int beatDataCount = 0;
 
-//Used to debounce D0
+//Used to debounce VIB_SENS
 Bounce debouncer = Bounce();
 
 // the setup routine runs once when you press reset:
@@ -71,16 +78,16 @@ void setup() {
   Serial.begin(9600);
 
   //Settings the pinout
-  pinMode(D0, INPUT_PULLUP);   // Vibration sensor
-  pinMode(D5, OUTPUT);  // B -> RGB LED
-  pinMode(D4, OUTPUT);  // G -> RGB LED
-  pinMode(D2, OUTPUT);  // Piezzo Speaker
-  pinMode(D1, OUTPUT);  // Red LED
+  pinMode(VIB_SENS, INPUT_PULLUP);  
+  pinMode(BLUE_RGB_LED, OUTPUT); 
+  pinMode(GREEN_RGB_LED, OUTPUT); 
+  pinMode(PIEZZO, OUTPUT); 
+  pinMode(FAIL_LED, OUTPUT); 
 
   setupWifi();
   setupServer();
 
-  debouncer.attach(D0);
+  debouncer.attach(VIB_SENS);
   debouncer.interval(30);
   pulse_init();
 }
@@ -204,18 +211,18 @@ void metronome() {
   if (beatInterval >= intervalBtwNotes) {
 
     if (beatCounter % timeDefinition == 0) {
-      tone(D2, 440, 50);
-      digitalWrite(D4, HIGH);
+      tone(PIEZZO, 440, 50);
+      digitalWrite(GREEN_RGB_LED, HIGH);
     }
     else {
-      tone(D2, 300, 50);
-      digitalWrite(D5, HIGH);
+      tone(PIEZZO, 300, 50);
+      digitalWrite(BLUE_RGB_LED, HIGH);
     }
 
     delay (20);
     //Turning off both LED is cheaper than checking which one to turn off
-    digitalWrite(D5, LOW);
-    digitalWrite(D4, LOW);
+    digitalWrite(BLUE_RGB_LED, LOW);
+    digitalWrite(GREEN_RGB_LED, LOW);
 
     beatCounter++;
 
@@ -254,15 +261,15 @@ void beatCheck() {
       badBeats++;
       CREATE_BEAT_DATA(false)
       
-      digitalWrite(D1, HIGH);
+      digitalWrite(FAIL_LED, HIGH);
       delay(1);
-      digitalWrite(D1, LOW);
+      digitalWrite(FAIL_LED, LOW);
     }
   }
 }
 
 void pulse_init() {
-  pinMode(D0, INPUT);
+  pinMode(VIB_SENS, INPUT);
 }
 
 unsigned char pulse_count(unsigned long *p_count) {
