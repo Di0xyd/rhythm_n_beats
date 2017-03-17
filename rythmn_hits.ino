@@ -19,8 +19,7 @@
   beatsData[beatDataIndex++] = bd;\
   beatDataCount++; 
 #define RESET_INTERVAL_BTW_NOTES()  MS_IN_1_MIN / bpm;
-#define RESET_BEAT_DATA() beatDataIndex = 0;\
-    beatDataCount = 0;
+#define RESET_BEAT_DATA() beatDataIndex = 0;
 
   void setupServer();
   void setupWifi();
