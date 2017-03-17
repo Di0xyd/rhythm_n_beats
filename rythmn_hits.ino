@@ -161,7 +161,9 @@ void getBeatsData() {
 
   for (int i = 0; i < beatDataCount; i++) {
 
-    toReturn += String(beatsData[i].time) += String(",") += String(beatsData[i].success);
+    toReturn += String("\"") += String(beatsData[i].time) += String("\"") 
+    += String(",") 
+    += String("\"") += String(beatsData[i].success) += String("\"");
 
     //if this is not the last data
     if (i < beatDataCount - 1) {

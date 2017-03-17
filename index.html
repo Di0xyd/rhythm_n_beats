@@ -3,7 +3,9 @@
 <head>
 
 	<!-- Latest compiled and minified Bootstrap CSS -->
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/chartist.js/latest/chartist.min.css">
 	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+
 
 	<meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -54,17 +56,21 @@
 				</div>
 				<div class="col-md-6">
 					<h3 class="actual">Beats data  : <span id="beatsData"></span></h3>
+					<div class="ct-chart ct-perfect-fourth"></div>
 				</div>
 			</div>
 		</div>
 	</div>
 
+	<script src="https://cdn.jsdelivr.net/chartist.js/latest/chartist.min.js"></script>
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
-	<!-- Latest compiled and minified JavaScript -->
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-csv/0.71/jquery.csv-0.71.min.js"></script>
 	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+
 
 	<script>
 		$(document).ready(function() {
+
 			getCurrentBPM();
 			getTimeDefinition();
 
@@ -74,7 +80,7 @@
 
 			setInterval(getGoodBeats, 5000);
 			setInterval(getBadBeats, 5000);
-			setInterval(getBeatsData, 5000);
+			setInterval(getBeatsData, 500);
 
 			$('#updateBPMForm').submit(function(form) {
 				form.preventDefault();
@@ -129,10 +135,36 @@
 
 		function getBeatsData() {
 			$.get("http://10.33.3.114/getbeatsdata", function (data) {
-				$("#beatsData").html(data);
+				var beatsData = $.csv.toArrays(data);
+				var label = [];
+				var good = [];
+				var bad = [];
+				$.each(beatsData, function(index, row) {
+						label.push(row[0]);
+						if(row[1] == 1){
+							good.push(row[1]);
+						}
+						else {
+							bad.push(1);
+						}
+
+				});
+
+				new Chartist.Bar('.ct-chart', {
+					labels: label,
+					series: [
+						bad, good
+					]
+				}, {
+					seriesBarDistance: 10,
+					reverseData: false,
+					horizontalBars: false,
+					axisY: {
+						offset: 70
+					}
+				});
 			});
 		}
-
 	</script>
 </body>
 </html>
