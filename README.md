@@ -60,4 +60,7 @@ We made the project by following these steps :
 [![Setting and getting the time definition](https://img.youtube.com/vi/FjAb9SdDtYA/0.jpg)](https://youtu.be/FjAb9SdDtYA)
 
 ## Web interactions
-[![Setting and getting the time definition](https://img.youtube.com/vi/PhCPkcvQI1Q/0.jpg)](https://youtu.be/PhCPkcvQI1Q)
+[![Web interaction](https://img.youtube.com/vi/qnAV3mCK1p8/0.jpg)](https://youtu.be/qnAV3mCK1p8)
+
+## Web interactions (alternative)
+[![Web interaction](https://img.youtube.com/vi/PhCPkcvQI1Q/0.jpg)](https://youtu.be/PhCPkcvQI1Q)
