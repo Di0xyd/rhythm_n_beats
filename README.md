@@ -39,3 +39,17 @@ We made the project by following these steps :
 ## Breadboard wiring
 
 ![Breadboard](sketch.png "Breadboard")
+
+## Videos
+
+### Setting and getting the BPM
+[![Setting and getting the BPM](https://img.youtube.com/vi/gR4f6klOqsU/0.jpg)](https://www.youtube.com/watch?v=gR4f6klOqsU)
+
+### Getting beats data
+[![Setting and getting the BPM](https://img.youtube.com/vi/wNvEvPR9qUs/0.jpg)](https://youtu.be/wNvEvPR9qUs)
+
+## Getting good or bad beats
+[![Getting good or bad beats](https://img.youtube.com/vi/L6ADgI4pOfE/0.jpg)](https://youtu.be/L6ADgI4pOfE)
+
+## Setting and getting the time definition
+[![Setting and getting the time definition](https://img.youtube.com/vi/FjAb9SdDtYA/0.jpg)](https://youtu.be/FjAb9SdDtYA)
