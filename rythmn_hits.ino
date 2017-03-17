@@ -10,11 +10,17 @@
 #include "html.h"
 
 #define BEATS_DATA_MAX 15
+#define GOOD_BEAT_ERROR_MARGIN 100
+#define MS_IN_1_MIN 60000
+
 #define CREATE_BEAT_DATA(suc)    BeatData bd; \
   bd.success = suc; \
   bd.time = currentTime; \
   beatsData[beatDataIndex++] = bd;\
-  beatDataCount++; \
+  beatDataCount++; 
+#define RESET_INTERVAL_BTW_NOTES()  MS_IN_1_MIN / bpm;
+#define RESET_BEAT_DATA() beatDataIndex = 0;\
+    beatDataCount = 0;
 
   void setupServer();
   void setupWifi();
@@ -44,8 +50,7 @@
   long goodBeats = 0;                        // Counting the good beats
   long bpm = 60;                            // Beats Per Minute
   long beatCounter = 0;                     // Counting the beats for a measure (4/4 has 4 times)
-  const long msCountIn1Min = 60000;         // Numbers of ms in 1 sec
-  long intervalBtwNotes = msCountIn1Min / bpm;  // time beetwen each note in ms
+  long intervalBtwNotes = RESET_INTERVAL_BTW_NOTES()  // time beetwen each note in ms
   long lastBeatTime = 0;                    // Last time the metronome beated
   long unsigned int beatInterval = 0;       // Used to count the interval beetwen two beats
   int timeDefinition = 4;                   // Length of a measure
@@ -105,7 +110,7 @@
         return;
       }
 
-      intervalBtwNotes = msCountIn1Min / bpm;
+        RESET_INTERVAL_BTW_NOTES()
     }
 
     server.send(200, "text/html", "OK");
@@ -155,6 +160,7 @@
       toReturn += String(" { \"time\" : ") += String(beatsData[i].time) += String(",");
       toReturn += String(" \"success\" : ") += String(beatsData[i].success) += String(" }");
 
+      //if this is not the last data
       if (i < beatDataCount - 1) {
         toReturn += String(",");
       }
@@ -224,22 +230,21 @@
 
   void beatCheck() {
     long sensor = debouncer.read();
-    long errorMargin = 100;
 
-    if (pulse_count(&beatInterval) == 1)
+    if (pulse_count(&beatInterval) == HIGH)
     {
       long currentTime = millis();
 
       if (beatDataIndex > BEATS_DATA_MAX) {
-        resetBeatsData();
+        RESET_BEAT_DATA()
       }
 
-      if (beatInterval > intervalBtwNotes - errorMargin
-          && beatInterval < intervalBtwNotes + errorMargin )
+      if (beatInterval > intervalBtwNotes - GOOD_BEAT_ERROR_MARGIN
+          && beatInterval < intervalBtwNotes + GOOD_BEAT_ERROR_MARGIN )
       {
         //if beetwen -margin and + margin from beat
-        if (currentTime >= lastBeatTime + beatInterval - errorMargin
-            || currentTime <= lastBeatTime + errorMargin)
+        if (currentTime >= lastBeatTime + beatInterval - GOOD_BEAT_ERROR_MARGIN
+            || currentTime <= lastBeatTime + GOOD_BEAT_ERROR_MARGIN)
         {
           goodBeats++;
           CREATE_BEAT_DATA(true)
@@ -278,10 +283,6 @@
     }
   }
 
-  void resetBeatsData() {
-    beatDataIndex = 0;
-    beatDataCount = 0;
-  }
 
 
 
