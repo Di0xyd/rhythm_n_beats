@@ -3,6 +3,9 @@
 The goal of this project is to allow a drummer to train his rythmic accuracy.
 It is composed of a metronome, a beat checker and a web interface to check for the accuracy and set the BPM.
 
+Presentation :
+https://docs.google.com/presentation/d/1xdCSkL8qbcyVTBPpQBJs417q2Ef24dG_lXIc18mRad8/edit?usp=sharing
+
 ## Needed hardware
 - Weemos D1 Mini
 - RGB LED with common anode
