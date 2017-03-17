@@ -34,23 +34,28 @@
 	<div class="container">
 		<div class="content">
 			<h1>IoT Project - Rythm'n Hits</h1>
-			<br><br>
-			<h3 class="actual">Good beats  : <span id="goodBeats"></span></h3>
-			<h3 class="actual">Bad beats : <span id="badBeats"></span></h3>
-			<br><br>
-			<h3 class="actual">Current BPM: <span id="actualBPM"></span></h3>
-			<form method="get" action="" id="updateBPMForm" class="form-inline">
-				<input type="number" id="inputBpm" class="form-control mb-2 mr-sm-2 mb-sm-0" name="bpm">
-				<input type="submit" class="btn btn-primary" value="Update BPM">
-			</form>
-			<br><br>
-			<h3 class="actual">Current Time definition : <span id="actualTD"></span></h3>
-			<form method="get" action="" id="updateTDForm" class="form-inline">
-				<input type="number" id="inputTD" class="form-control mb-2 mr-sm-2 mb-sm-0" name="timedefinition">
-				<input type="submit" class="btn btn-primary" value="Update Time definition">
-			</form>
-			<br><br>
-			<h3 class="actual">Beats data  : <span id="beatsData"></span></h3>
+			<div class="row">
+				<div class="col-md-6">
+					<br><br>
+					<h3 class="actual">Good beats  : <span id="goodBeats"></span></h3>
+					<h3 class="actual">Bad beats : <span id="badBeats"></span></h3>
+					<br><br>
+					<h3 class="actual">Current BPM: <span id="actualBPM"></span></h3>
+					<form method="get" action="" id="updateBPMForm" class="form-inline">
+						<input type="number" id="inputBpm" class="form-control mb-2 mr-sm-2 mb-sm-0" name="bpm">
+						<input type="submit" class="btn btn-primary" value="Update BPM">
+					</form>
+					<br><br>
+					<h3 class="actual">Current Time definition : <span id="actualTD"></span></h3>
+					<form method="get" action="" id="updateTDForm" class="form-inline">
+						<input type="number" id="inputTD" class="form-control mb-2 mr-sm-2 mb-sm-0" name="timedefinition">
+						<input type="submit" class="btn btn-primary" value="Update Time definition">
+					</form>
+				</div>
+				<div class="col-md-6">
+					<h3 class="actual">Beats data  : <span id="beatsData"></span></h3>
+				</div>
+			</div>
 		</div>
 	</div>
 
