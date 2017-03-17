@@ -20,7 +20,7 @@
   if(beatDataCount < BEATS_DATA_MAX){ \
     beatDataCount++; \
   }
-#define RESET_INTERVAL_BTW_NOTES()  MS_IN_1_MIN / bpm;
+#define RESET_INTERVAL_BTW_NOTES() intervalBtwNotes = MS_IN_1_MIN / bpm;
 #define RESET_BEAT_DATA() beatDataIndex = 0;
 
 void setupServer();
@@ -51,8 +51,8 @@ long badBeats = 0;                         // Counting the bad beats
 long goodBeats = 0;                        // Counting the good beats
 long bpm = 60;                            // Beats Per Minute
 long beatCounter = 0;                     // Counting the beats for a measure (4/4 has 4 times)
-long intervalBtwNotes = RESET_INTERVAL_BTW_NOTES()  // time beetwen each note in ms
-                        long lastBeatTime = 0;                    // Last time the metronome beated
+long intervalBtwNotes =  MS_IN_1_MIN / bpm; // time beetwen each note in ms
+long lastBeatTime = 0;                    // Last time the metronome beated
 long unsigned int beatInterval = 0;       // Used to count the interval beetwen two beats
 int timeDefinition = 4;                   // Length of a measure
 
@@ -75,6 +75,7 @@ void setup() {
   pinMode(D5, OUTPUT);  // B -> RGB LED
   pinMode(D4, OUTPUT);  // G -> RGB LED
   pinMode(D2, OUTPUT);  // Piezzo Speaker
+  pinMode(D1, OUTPUT);  // Red LED
 
   setupWifi();
   setupServer();
@@ -154,22 +155,20 @@ void getBadBeats() {
 }
 
 void getBeatsData() {
-  String toReturn =  "[";
+  String toReturn =  "";
 
   for (int i = 0; i < beatDataCount; i++) {
 
-    toReturn += String(" { \"time\" : ") += String(beatsData[i].time) += String(",");
-    toReturn += String(" \"success\" : ") += String(beatsData[i].success) += String(" }");
+    toReturn += String(beatsData[i].time) += String(",") += String(beatsData[i].success);
 
     //if this is not the last data
     if (i < beatDataCount - 1) {
-      toReturn += String(",");
+      toReturn += String("\n");
     }
   }
 
-  toReturn += String("]");
   Serial.println(toReturn);
-  server.send(200, "text/json", toReturn);
+  server.send(200, "text/plain", toReturn);
 }
 
 void setupWifi() {
@@ -254,6 +253,10 @@ void beatCheck() {
     else {
       badBeats++;
       CREATE_BEAT_DATA(false)
+      
+      digitalWrite(D1, HIGH);
+      delay(1);
+      digitalWrite(D1, LOW);
     }
   }
 }
