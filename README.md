@@ -14,6 +14,11 @@ It is composed of a metronome, a beat checker and a web interface to check for t
 The wifi code is based of this github repository so, you will need to follow their instructions:
 - https://github.com/honnet/iot_intro/wiki/IOT-Intro
 
+You will also need to add the bounce2 library which is used to debounce inputs :
+- https://github.com/thomasfredericks/Bounce2
+
+- Once these steps are completed, you will need to push the code into the Arduino, setup the wifi via the captive portal, then check on the Arduino console for the IP address of the server on your local network. Connect, et voilà !
+
 ## Steps followed
 We made the project by following these steps :
 
