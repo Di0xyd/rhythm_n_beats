@@ -35,11 +35,22 @@
 		<div class="content">
 			<h1>IoT Project - Rythm'n Hits</h1>
 			<br><br>
-			<h3 class="actual">Actual BPM: <span id="actualBPM"></span></h3>
-			<form method="get" action="http://10.33.3.86/setbpm" id="updateBPMForm" class="form-inline">
+			<h3 class="actual">Good beats  : <span id="goodBeats"></span></h3>
+			<h3 class="actual">Bad beats : <span id="badBeats"></span></h3>
+			<br><br>
+			<h3 class="actual">Current BPM: <span id="actualBPM"></span></h3>
+			<form method="get" action="" id="updateBPMForm" class="form-inline">
 				<input type="number" id="inputBpm" class="form-control mb-2 mr-sm-2 mb-sm-0" name="bpm">
 				<input type="submit" class="btn btn-primary" value="Update BPM">
 			</form>
+			<br><br>
+			<h3 class="actual">Current Time definition : <span id="actualTD"></span></h3>
+			<form method="get" action="" id="updateTDForm" class="form-inline">
+				<input type="number" id="inputTD" class="form-control mb-2 mr-sm-2 mb-sm-0" name="timedefinition">
+				<input type="submit" class="btn btn-primary" value="Update Time definition">
+			</form>
+			<br><br>
+			<h3 class="actual">Beats data  : <span id="beatsData"></span></h3>
 		</div>
 	</div>
 
@@ -50,11 +61,20 @@
 	<script>
 		$(document).ready(function() {
 			getCurrentBPM();
+			getTimeDefinition();
+
+			getGoodBeats();
+			getBadBeats();
+			getBeatsData();
+
+			setInterval(getGoodBeats, 5000);
+			setInterval(getBadBeats, 5000);
+			setInterval(getBeatsData, 5000);
 
 			$('#updateBPMForm').submit(function(form) {
 				form.preventDefault();
 				$.ajax({
-					url: 'http://10.33.3.86/setbpm',
+					url: 'http://10.33.3.114/setbpm',
 					type: 'get',
 					data: $("#updateBPMForm").serialize(),
 					success: function() {
@@ -64,13 +84,50 @@
 			});
 		});
 
+		$('#updateTDForm').submit(function(form) {
+			form.preventDefault();
+			$.ajax({
+				url: 'http://10.33.3.114/settimedefinition',
+				type: 'get',
+				data: $("#updateTDForm").serialize(),
+				success: function() {
+					getTimeDefinition();
+				}
+			});
+		});
+
 		function getCurrentBPM() {
-			$.get("http://10.33.3.86/getbpm", function (data) {
+			$.get("http://10.33.3.114/getbpm", function (data) {
 				$("#actualBPM").html(data);
 				$("#inputBpm").val(data);
 			});
 		}
+
+		function getTimeDefinition() {
+			$.get("http://10.33.3.114/gettimedefinition", function (data) {
+				$("#actualTD").html(data);
+				$("#inputTD").val(data);
+			});
+		}
+
+		function getGoodBeats() {
+			$.get("http://10.33.3.114/getgoodbeats", function (data) {
+				$("#goodBeats").html(data);
+			});
+		}
+
+		function getBadBeats() {
+			$.get("http://10.33.3.114/getbadbeats", function (data) {
+				$("#badBeats").html(data);
+			});
+		}
+
+		function getBeatsData() {
+			$.get("http://10.33.3.114/getbeatsdata", function (data) {
+				$("#beatsData").html(data);
+			});
+		}
+
 	</script>
 </body>
 </html>
-

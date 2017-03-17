@@ -1,3 +1,5 @@
+#include <Servo.h>
+
 
 /****Includes****/
 #include <ESP8266WiFi.h>          //https://github.com/esp8266/Arduino
@@ -71,7 +73,7 @@ void setup() {
   Serial.begin(9600);
 
   //Settings the pinout
-  pinMode(D0, INPUT_PULLUP);   // Vibration sensor
+  pinMode(D0, INPUT);   // Vibration sensor
   pinMode(D5, OUTPUT);  // B -> RGB LED
   pinMode(D4, OUTPUT);  // G -> RGB LED
   pinMode(D2, OUTPUT);  // Piezzo Speaker
