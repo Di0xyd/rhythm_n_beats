@@ -55,7 +55,6 @@
 					</form>
 				</div>
 				<div class="col-md-6">
-					<h3 class="actual">Beats data  : <span id="beatsData"></span></h3>
 					<div class="ct-chart ct-perfect-fourth"></div>
 				</div>
 			</div>
@@ -133,34 +132,44 @@
 			});
 		}
 
+		var label = [];
+		var beats = [];
+		var bad = [];
+		startIndex = 0;
+
 		function getBeatsData() {
 			$.get("http://10.33.3.114/getbeatsdata", function (data) {
 				var beatsData = $.csv.toArrays(data);
-				var label = [];
-				var good = [];
-				var bad = [];
+
 				$.each(beatsData, function(index, row) {
+
+					if(label.length == 0 || label[label.length - 1] < row[0]){
 						label.push(row[0]);
-						if(row[1] == 1){
-							good.push(row[1]);
-						}
-						else {
-							bad.push(1);
-						}
+
+						if(row[1] == 1)
+							beats.push(row[1] + 10);
+						else
+							beats.push(5);
+					}
+					startIndex = label.length - 10;
+					if(startIndex < 0){
+						startIndex = 0;
+					}
 
 				});
 
 				new Chartist.Bar('.ct-chart', {
-					labels: label,
+					labels: label.slice(startIndex, label.length),
 					series: [
-						bad, good
+						beats.slice(startIndex, label.length)
 					]
 				}, {
 					seriesBarDistance: 10,
 					reverseData: false,
 					horizontalBars: false,
 					axisY: {
-						offset: 70
+						offset: 10,
+						type: Chartist.FixedScaleAxis
 					}
 				});
 			});
