@@ -14,6 +14,11 @@ It is composed of a metronome, a beat checker and a web interface to check for t
 The wifi code is based of this github repository so, you will need to follow their instructions:
 - https://github.com/honnet/iot_intro/wiki/IOT-Intro
 
+You will also need to add the bounce2 library which is used to debounce inputs :
+- https://github.com/thomasfredericks/Bounce2
+
+- Once these steps are completed, you will need to push the code into the Arduino, setup the wifi via the captive portal, then check on the Arduino console for the IP address of the server on your local network. Connect, et voilà !
+
 ## Steps followed
 We made the project by following these steps :
 
@@ -34,8 +39,25 @@ We made the project by following these steps :
   - IHM :
     - show number of good beats
     - show number of wrong beats
-    - Graphs of beats for 10 last measures
+    - Graphs of beats for last measures
 
 ## Breadboard wiring
 
 ![Breadboard](sketch.png "Breadboard")
+
+## Videos
+
+### Setting and getting the BPM
+[![Setting and getting the BPM](https://img.youtube.com/vi/gR4f6klOqsU/0.jpg)](https://www.youtube.com/watch?v=gR4f6klOqsU)
+
+### Getting beats data
+[![Setting and getting the BPM](https://img.youtube.com/vi/wNvEvPR9qUs/0.jpg)](https://youtu.be/wNvEvPR9qUs)
+
+## Getting good or bad beats
+[![Getting good or bad beats](https://img.youtube.com/vi/L6ADgI4pOfE/0.jpg)](https://youtu.be/L6ADgI4pOfE)
+
+## Setting and getting the time definition
+[![Setting and getting the time definition](https://img.youtube.com/vi/FjAb9SdDtYA/0.jpg)](https://youtu.be/FjAb9SdDtYA)
+
+## Web interactions
+[![Setting and getting the time definition](https://img.youtube.com/vi/PhCPkcvQI1Q/0.jpg)](https://youtu.be/PhCPkcvQI1Q)

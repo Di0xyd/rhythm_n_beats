@@ -1,3 +1,4 @@
+
 /****Includes****/
 #include <ESP8266WiFi.h>          //https://github.com/esp8266/Arduino
 #include <WiFiClient.h>
@@ -5,26 +6,63 @@
 #include <ESP8266WebServer.h>     //Local WebServer used to serve the configuration portal
 #include <WiFiManager.h>          //https://github.com/tzapu/WiFiManager WiFi Configuration Magic
 #include <ESP8266mDNS.h>          //Allow custom URL
+#include <Bounce2.h>
 #include "html.h"
+
+#define BEATS_DATA_MAX 5
+#define GOOD_BEAT_ERROR_MARGIN 100
+#define MS_IN_1_MIN 60000
+
+#define CREATE_BEAT_DATA(suc)    BeatData bd; \
+  bd.success = suc; \
+  bd.time = currentTime; \
+  beatsData[beatDataIndex++] = bd;\
+  if(beatDataCount < BEATS_DATA_MAX){ \
+    beatDataCount++; \
+  }
+#define RESET_INTERVAL_BTW_NOTES() intervalBtwNotes = MS_IN_1_MIN / bpm;
+#define RESET_BEAT_DATA() beatDataIndex = 0;
 
 void setupServer();
 void setupWifi();
 void metronome();
-void flash(int pin);
 void handleRoot();
 void setBpm();
 void getBpm();
-bool isBeat(int ms);
+void beatCheck();
+unsigned char pulse_count(unsigned long *p_count);
+void pulse_init();
+void setTimeDefinition();
+void getTimeDefinition();
+void getGoodBeats();
+void getBadBeats();
+void getBeatsData();
+void resetBeatsData();
+
+typedef struct S_BEAT_DATA {
+  bool success;
+  long time;
+} BeatData;
 
 ESP8266WebServer server(80);
 const char *ssid = "metronome_server";
 
-long goodBeat = 0;                        // Counting the good beats
+long badBeats = 0;                         // Counting the bad beats
+long goodBeats = 0;                        // Counting the good beats
 long bpm = 60;                            // Beats Per Minute
 long beatCounter = 0;                     // Counting the beats for a measure (4/4 has 4 times)
-const long msCountIn1Min = 60000;         // Numbers of ms in 1 sec
-long waitBtwNotes = msCountIn1Min / bpm;  // time beetwen each note in ms
-long lastBeatTime = 0;
+long intervalBtwNotes =  MS_IN_1_MIN / bpm; // time beetwen each note in ms
+long lastBeatTime = 0;                    // Last time the metronome beated
+long unsigned int beatInterval = 0;       // Used to count the interval beetwen two beats
+int timeDefinition = 4;                   // Length of a measure
+
+//Related to the saving of beats data
+BeatData beatsData[BEATS_DATA_MAX];
+int beatDataIndex = 0;
+int beatDataCount = 0;
+
+//Used to debounce D0
+Bounce debouncer = Bounce();
 
 // the setup routine runs once when you press reset:
 void setup() {
@@ -33,18 +71,25 @@ void setup() {
   Serial.begin(9600);
 
   //Settings the pinout
-  pinMode(D0, INPUT);   // Vibration sensor
+  pinMode(D0, INPUT_PULLUP);   // Vibration sensor
   pinMode(D5, OUTPUT);  // B -> RGB LED
   pinMode(D4, OUTPUT);  // G -> RGB LED
   pinMode(D2, OUTPUT);  // Piezzo Speaker
-  
+  pinMode(D1, OUTPUT);  // Red LED
+
   setupWifi();
   setupServer();
+
+  debouncer.attach(D0);
+  debouncer.interval(30);
+  pulse_init();
 }
 
 void loop() {
 
+  debouncer.update();
   metronome();
+  beatCheck();
   server.handleClient();
 }
 
@@ -57,7 +102,7 @@ void setBpm() {
   if ( server.hasArg("bpm") ) {
 
     bpm_str = server.arg(0);
-    //add function to init
+
     long old_bpm = bpm;
     bpm = bpm_str.toInt();
 
@@ -67,7 +112,7 @@ void setBpm() {
       return;
     }
 
-    waitBtwNotes = msCountIn1Min / bpm;
+    RESET_INTERVAL_BTW_NOTES()
   }
 
   server.send(200, "text/html", "OK");
@@ -77,8 +122,57 @@ void getBpm() {
   server.send(200, "text/html", String(bpm));
 }
 
+void setTimeDefinition() {
+
+  String timeDefStr;
+  if ( server.hasArg("timedefinition") ) {
+
+    timeDefStr = server.arg(0);
+
+    long oldTimeDef = timeDefinition;
+    timeDefinition = timeDefStr.toInt();
+
+    if (timeDefinition <= 0 || timeDefinition > 32)  {
+      timeDefinition = oldTimeDef;
+      server.send(400, "text/html", "error");
+      return;
+    }
+  }
+
+  server.send(200, "text/html", "OK");
+}
+
+void getTimeDefinition() {
+  server.send(200, "text/html", String(timeDefinition));
+}
+
+void getGoodBeats() {
+  server.send(200, "text/html", String(goodBeats));
+}
+
+void getBadBeats() {
+  server.send(200, "text/html", String(badBeats));
+}
+
+void getBeatsData() {
+  String toReturn =  "";
+
+  for (int i = 0; i < beatDataCount; i++) {
+
+    toReturn += String(beatsData[i].time) += String(",") += String(beatsData[i].success);
+
+    //if this is not the last data
+    if (i < beatDataCount - 1) {
+      toReturn += String("\n");
+    }
+  }
+
+  Serial.println(toReturn);
+  server.send(200, "text/plain", toReturn);
+}
+
 void setupWifi() {
-  
+
   Serial.println("Starting wifi");
   WiFiManager wifiManager;
   wifiManager.setAPCallback([](WiFiManager * manager) {});
@@ -90,9 +184,15 @@ void setupWifi() {
 }
 
 void setupServer() {
+
   server.on("/", handleRoot);
   server.on("/setbpm", setBpm);
   server.on("/getbpm", getBpm);
+  server.on("/settimedefinition", setTimeDefinition);
+  server.on("/gettimedefinition", getTimeDefinition);
+  server.on("/getbadbeats", getBadBeats);
+  server.on("/getgoodbeats", getGoodBeats);
+  server.on("/getbeatsdata", getBeatsData);
   server.begin();
   Serial.println("HTTP server started");
 }
@@ -100,12 +200,10 @@ void setupServer() {
 void metronome() {
 
   long beatInterval = millis() - lastBeatTime;
-  
-  if (beatInterval >= waitBtwNotes) {
 
-    lastBeatTime = millis();
+  if (beatInterval >= intervalBtwNotes) {
 
-    if (beatCounter % 4 == 0) {
+    if (beatCounter % timeDefinition == 0) {
       tone(D2, 440, 50);
       digitalWrite(D4, HIGH);
     }
@@ -114,37 +212,81 @@ void metronome() {
       digitalWrite(D5, HIGH);
     }
 
-    if (isBeat(100)) {
-      goodBeat++;
-    }
-
+    delay (20);
+    //Turning off both LED is cheaper than checking which one to turn off
     digitalWrite(D5, LOW);
     digitalWrite(D4, LOW);
 
     beatCounter++;
-    
-    if (beatCounter > 3) {
+
+    if (beatCounter > timeDefinition - 1) {
       beatCounter = 0;
     }
+
+    lastBeatTime = millis();
   }
 
 }
 
-//checks if the sensors sensed a vibrating within the interval
-bool isBeat(int ms) {
+void beatCheck() {
+  long sensor = debouncer.read();
 
-  long currentTime = millis();
-  long sensorValue = 0;
+  if (pulse_count(&beatInterval) == HIGH)
+  {
+    long currentTime = millis();
 
-  while (millis() <= currentTime + ms) {
+    if (beatDataIndex > BEATS_DATA_MAX) {
+      RESET_BEAT_DATA()
+    }
 
-    if (digitalRead(D0) == 1) {
-      sensorValue = 1;
+    if (beatInterval > intervalBtwNotes - GOOD_BEAT_ERROR_MARGIN
+        && beatInterval < intervalBtwNotes + GOOD_BEAT_ERROR_MARGIN )
+    {
+      //if beetwen -margin and + margin from beat
+      if (currentTime >= lastBeatTime + beatInterval - GOOD_BEAT_ERROR_MARGIN
+          || currentTime <= lastBeatTime + GOOD_BEAT_ERROR_MARGIN)
+      {
+        goodBeats++;
+        CREATE_BEAT_DATA(true)
+      }
+    }
+    else {
+      badBeats++;
+      CREATE_BEAT_DATA(false)
+      
+      digitalWrite(D1, HIGH);
+      delay(1);
+      digitalWrite(D1, LOW);
     }
   }
-
-  return sensorValue == 1;
 }
+
+void pulse_init() {
+  pinMode(D0, INPUT);
+}
+
+unsigned char pulse_count(unsigned long *p_count) {
+  static unsigned char pin_prev = 0; //previous state of the pin
+  static unsigned long start_time = millis();
+  unsigned long time;
+  unsigned char tmp = debouncer.read();
+
+  if (tmp ^ pin_prev) {  //pin state has changed
+    time = millis();       //record current time
+    pin_prev = tmp;    //save the pin state
+    if (start_time) {    //already in a counting session now
+      *p_count = time - start_time;  //calculate time elapsed
+      start_time = 0;    //indicating end of a counting session
+      return 1;          //we have new data
+    } else {             //start of a counting session
+      start_time = time; //record the start time
+      return 0;          //no count yet
+    }
+  } else {               //pin state has not changed
+    return 0;            //no new count
+  }
+}
+
 
 
 
