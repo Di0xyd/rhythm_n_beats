@@ -34,7 +34,7 @@ We made the project by following these steps :
   - IHM :
     - show number of good beats
     - show number of wrong beats
-    - Graphs of beats for 10 last measures
+    - Graphs of beats for last measures
 
 ## Breadboard wiring
 
@@ -53,3 +53,6 @@ We made the project by following these steps :
 
 ## Setting and getting the time definition
 [![Setting and getting the time definition](https://img.youtube.com/vi/FjAb9SdDtYA/0.jpg)](https://youtu.be/FjAb9SdDtYA)
+
+## Web interactions
+[![Setting and getting the time definition](https://img.youtube.com/vi/PhCPkcvQI1Q/0.jpg)](https://youtu.be/PhCPkcvQI1Q)
